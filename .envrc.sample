@@ -1,0 +1,3 @@
+use flake
+
+export ZORG_SSH_KEY=~/.ssh/backup_key_ed25519

@@ -1,0 +1,7 @@
+/.direnv
+/.envrc
+/cache
+/creds
+/repos
+/ignored.txt
+*.private.*
