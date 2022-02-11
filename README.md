@@ -1,5 +1,5 @@
  - shellcheck pass
- - no docs
+ - no docs yet
  - pretty much ./backup_all.sh rpool/data/stuff
    - .../stuff/* repos created
    - nested unsupported
