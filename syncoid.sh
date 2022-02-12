@@ -1,5 +1,4 @@
-#!/usr/bin/env nix-shell
-#!nix-shell -i bash -p sanoid lzop pv mbuffer
+#!/usr/bin/env bash
 # shellcheck shell=bash
 set -euo pipefail
 
@@ -9,5 +8,7 @@ set -euo pipefail
 # - target: sudo zfs allow -u mark snapshot,receive,create,mount,rollback,destroy htank/backups/gameserver
 # In ideal you should set up a dedicated user for syncoid (& on NixOS, ensure that user environment has all needed packages on PATH, 
 # easily doable using configuration.nix/flake)
+
+# You need to ensure that ${ZORG_SANOID_DATASET_TARGET} exists
 
 syncoid --no-privilege-elevation --skip-parent --recursive --no-sync-snap "${ZORG_SANOID_DATASET_SOURCE}" "${ZORG_SANOID_DATASET_TARGET}"

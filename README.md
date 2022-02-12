@@ -17,6 +17,10 @@
 
 GPL-3.0 also
 
+## Trivia
+
+- Yes, it works on macOS
+
 ## TODO
 
 - [ ] mount credentials into ramfs to prevent risking with swapping raw credentials on disk
