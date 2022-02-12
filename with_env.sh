@@ -4,7 +4,7 @@ set -euo pipefail
 repo="${1}"
 shift
 
-use_cache=1
+: "${ZORG_USE_BORG_CACHE:=0}"
 
 scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
 repodir="${scriptdir}/repos"
@@ -22,7 +22,7 @@ test -d "${repodir}/${repo}" || "${scriptdir}/init.sh" "${repo}"
 "${scriptdir}/pass.sh" "${repo}" key | install -D -m 400 /dev/stdin "${_borgdir}/repo/key"
 
 
-if [ "${use_cache}" = "1" ]; then
+if [ "${ZORG_USE_BORG_CACHE}" = "1" ]; then
 	cachedir="${scriptdir}/cache"
 	mkdir -p "${cachedir}"
 	export BORG_CACHE_DIR="${cachedir}"
