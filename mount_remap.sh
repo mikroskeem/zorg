@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Mounts a dataset (or snapshot) into its own user & mount namespace, remapping fs uid/gid using
+# bindfs and running target program without real root privileges.
+# This allows backups to be so-called uid/gid-neutral and reproducible.
+
 elevate=()
 if [ "${UID}" -ne 0 ]; then
 	elevate+=(sudo --)
