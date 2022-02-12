@@ -4,7 +4,10 @@ set -euo pipefail
 # Initializes a repository with automatically generated passphrase, which
 # gets encrypted by rage using SSH key
 
-: "${ZORG_SSH_KEY}"
+if ! [ -f "${ZORG_SSH_KEY}" ]; then
+	echo ">>> ZORG_SSH_KEY does not exist"
+	exit 1
+fi
 
 scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
 source "${scriptdir}/common.sh"

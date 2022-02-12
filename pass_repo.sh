@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-: "${ZORG_SSH_KEY}"
+if ! [ -f "${ZORG_SSH_KEY}" ]; then
+	echo ">>> ZORG_SSH_KEY does not exist"
+	exit 1
+fi
 
 scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
 source "${scriptdir}/common.sh"
