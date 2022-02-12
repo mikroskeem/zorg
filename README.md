@@ -7,6 +7,7 @@
   - `.../stuff/*` will be turned into borg repos
   - nested datasets are not supported (e.g `rpool/data/stuff/x/y`)
 - generate `~/.ssh/backup_key_ed25519` (or configure `ZORG_SSH_KEY` envvar)
+  - `ssh-keygen -N "" -C "" -t ed25519 -f ~/.ssh/backup_key_ed25519` there you go
 - ignored.txt can do something like
   ```
   autosnap_.*
