@@ -30,7 +30,7 @@ keyfile="${_borgdir}/repo/key"
 
 export BORG_PASSPHRASE="${passphrase}"
 borg init --error --make-parent-dirs --encryption=keyfile-blake2 "${repodir}"
-borg key export "${repodir}" /dev/stdout | install -D -m 400 /dev/stdin "${keyfile}"
+borg key export "${repodir}" /dev/stdout | write_file 400 "${keyfile}"
 
 credsjson="$(jq -c <<EOF
 { "passphrase": "$(base64 -w 0 <<< "${passphrase}")"

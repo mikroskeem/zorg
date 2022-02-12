@@ -26,3 +26,14 @@ creds_dir () {
 
 	echo "${dir}"
 }
+
+write_file () {
+	perms="${1}"
+	target="${2}"
+
+	>&2 mkdir -p "$(dirname -- "${target}")"
+	>&2 touch "${target}"
+	>&2 chmod 600 "${target}"
+	cat > "${target}"
+	>&2 chmod "${perms}" "${target}"
+}

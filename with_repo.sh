@@ -11,6 +11,8 @@ shift
 : "${ZORG_USE_BORG_CACHE:=0}"
 
 scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
+source "${scriptdir}/common.sh"
+
 repodir="${scriptdir}/repos"
 
 _borgdir="$(mktemp --tmpdir -d borghome."${USER}".XXXXXXX)"
@@ -23,7 +25,7 @@ trap 'cleanup' EXIT
 
 
 test -d "${repodir}/${repo}" || "${scriptdir}/init_repo.sh" "${repo}"
-"${scriptdir}/pass_repo.sh" "${repo}" key | install -D -m 400 /dev/stdin "${_borgdir}/repo/key"
+"${scriptdir}/pass_repo.sh" "${repo}" key | write_file 400 "${_borgdir}/repo/key"
 
 
 if [ "${ZORG_USE_BORG_CACHE}" = "1" ]; then
