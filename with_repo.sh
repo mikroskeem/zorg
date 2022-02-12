@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Sets up environment variables and credentials for borg to open a repository.
+# If repository does not exist on disk, then it'll be initialized from scratch using
+# init_repo.sh script.
+
 repo="${1}"
 shift
 
@@ -18,8 +22,8 @@ cleanup () {
 trap 'cleanup' EXIT
 
 
-test -d "${repodir}/${repo}" || "${scriptdir}/init.sh" "${repo}"
-"${scriptdir}/pass.sh" "${repo}" key | install -D -m 400 /dev/stdin "${_borgdir}/repo/key"
+test -d "${repodir}/${repo}" || "${scriptdir}/init_repo.sh" "${repo}"
+"${scriptdir}/pass_repo.sh" "${repo}" key | install -D -m 400 /dev/stdin "${_borgdir}/repo/key"
 
 
 if [ "${ZORG_USE_BORG_CACHE}" = "1" ]; then
@@ -28,7 +32,7 @@ if [ "${ZORG_USE_BORG_CACHE}" = "1" ]; then
 	export BORG_CACHE_DIR="${cachedir}"
 fi
 
-export BORG_PASSCOMMAND="${scriptdir}/pass.sh '${repo}' passphrase"
+export BORG_PASSCOMMAND="${scriptdir}/pass_repo.sh '${repo}' passphrase"
 export BORG_KEY_FILE="${_borgdir}/repo/key"
 export BORG_BASE_DIR="${_borgdir}"
 export BORG_REPO="${repodir}/${repo}"

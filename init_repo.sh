@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Initializes a repository with automatically generated passphrase, which
+# gets encrypted by rage using SSH key
+
 : "${ZORG_SSH_KEY}"
 
 scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
