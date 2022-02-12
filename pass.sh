@@ -19,4 +19,4 @@ esac
 scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
 creds="${scriptdir}/creds/${repo}"
 
-rage -i ~/.ssh/backup_key_ed25519 -d "${creds}/creds.json.age" | jq -r "${selector}" | base64 -d
+rage -i "${ZORG_SSH_KEY}" -d "${creds}/creds.json.age" | jq -r "${selector}" | base64 -d

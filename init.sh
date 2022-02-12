@@ -35,4 +35,4 @@ EOF
 )"
 
 mkdir -p "${credsdir}"
-rage -i ~/.ssh/backup_key_ed25519 -e -o "${credsdir}/creds.json.age" <<< "${credsjson}"
+rage -i "${ZORG_SSH_KEY}" -e -o "${credsdir}/creds.json.age" <<< "${credsjson}"
