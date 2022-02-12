@@ -14,26 +14,40 @@ if [ -z "${_IN_NS:-}" ]; then
 fi
 
 
-snapshot="${1}"
+dataset="${1}"
+if ! zfs list -H -o name -s name "${dataset}" &>/dev/null; then
+	echo ">>> No such dataset: ${dataset}"
+	exit 1
+fi
+
 shift
 if [ -z "${*}" ]; then
 	echo ">>> No command specified"
 	exit 1
 fi
 
-IFS=@ read -r -a _snapshot <<< "${snapshot}"
-_dataset="${_snapshot[0]}"
-_snap="${_snapshot[1]}"
+mnt_final=""
+mountflags=()
+if grep -q "@" <<< "${dataset}"; then
+	IFS=@ read -r -a _snapshot <<< "${dataset}"
+	_dataset="${_snapshot[0]}"
+	_snap="${_snapshot[1]}"
+	mnt_final="/tmp/${_snap}"
+else
+	# work around zfs annoying mount mechanism
+	if ! [ "$(zfs get -H -o value mountpoint "${dataset}")" = "legacy" ]; then
+		mountflags+=(zfsutil)
+	fi
+	mountflags+=(ro)
+	mnt_final="/tmp/$(basename -- "${dataset}")"
+fi
 
 mount -t tmpfs tmpfs /tmp
+mnt_dataset="/tmp/.real/dataset"
+mkdir -p "${mnt_dataset}" "${mnt_final}"
 
-mnt_snap=/tmp/.real/snap
-mnt_final=/tmp/"${_snap}"
-
-mkdir -p "${mnt_snap}" "${mnt_final}"
-
-mount -t zfs "${snapshot}" "${mnt_snap}"
-bindfs -u "${_NS_UID}" -g "${_NS_GID}" "${mnt_snap}" "${mnt_final}" -f &
+mount -t zfs -o "$(IFS=,; echo "${mountflags[*]}")" "${dataset}" "${mnt_dataset}"
+bindfs -u "${_NS_UID}" -g "${_NS_GID}" "${mnt_dataset}" "${mnt_final}" -f &
 bpid="${!}"
 
 cleanup () {
