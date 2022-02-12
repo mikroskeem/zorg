@@ -25,7 +25,7 @@ fi
 
 tz=UTC
 borg=(
-	"${scriptdir}/with_env.sh"
+	"${scriptdir}/with_repo.sh"
 	"${repo}"
 	chrt -i 0
 	borg
@@ -39,7 +39,7 @@ done
 decho ">>> Done"
 
 # Ensure that repository exists
-"${scriptdir}/with_env.sh" "${repo}" :
+"${scriptdir}/with_repo.sh" "${repo}" :
 
 zfs list -H -t snapshot -o name,creation -s creation -p "${dataset}" | while read -r -a target; do
 	_snapname="${target[0]}"
