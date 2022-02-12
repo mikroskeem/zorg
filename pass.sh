@@ -3,6 +3,9 @@ set -euo pipefail
 
 : "${ZORG_SSH_KEY}"
 
+scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
+source "${scriptdir}/common.sh"
+
 repo="${1}"
 selector=""
 case "${2}" in
@@ -16,7 +19,6 @@ esac
 
 [ -n "${selector}" ]
 
-scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
-creds="${scriptdir}/creds/${repo}"
+credsdir="$(creds_dir "${repo}")"
 
-rage -i "${ZORG_SSH_KEY}" -d "${creds}/creds.json.age" | jq -r "${selector}" | base64 -d
+rage -i "${ZORG_SSH_KEY}" -d "${credsdir}/creds.json.age" | jq -r "${selector}" | base64 -d

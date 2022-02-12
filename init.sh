@@ -3,10 +3,12 @@ set -euo pipefail
 
 : "${ZORG_SSH_KEY}"
 
-repo="${1}"
 scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
+source "${scriptdir}/common.sh"
+
+repo="${1}"
 repodir="${scriptdir}/repos/${repo}"
-credsdir="${scriptdir}/creds/${repo}"
+credsdir="$(creds_dir "${repo}")"
 
 if [ -d "${credsdir}" ]; then
 	echo ">>> Credentials for '${repo}' already exist, bailing out."
