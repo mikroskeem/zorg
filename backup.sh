@@ -62,7 +62,7 @@ zfs list -H -t snapshot -o name,creation -s creation -p "${dataset}" | while rea
 			--arg ts "${ts}"
 		)
 		comment="json:$(jq "${comment_args[@]}" -c -r '{ dataset: $ds, snapshot: $s, ts: $ts }' <<< "{}" | base64 -w 0)"
-		"${scriptdir}/fuse.sh" "${_snapname}" "${borg[@]}" create --progress --comment "${comment}" --compression zstd ::"${name}" "./" || {
+		"${scriptdir}/mount_remap.sh" "${_snapname}" "${borg[@]}" create --progress --comment "${comment}" --compression zstd ::"${name}" "./" || {
 			echo ">>> Failed to backup '${name}'"
 			exit 1
 		}
