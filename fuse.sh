@@ -13,9 +13,11 @@ if [ -z "${_IN_NS:-}" ]; then
 		env _IN_NS=1 _NS_UID="$(id -u)" _NS_GID="$(id -g)" "${0}" "${@}"
 fi
 
+scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
+source "${scriptdir}/common.sh"
 
 dataset="${1}"
-if ! zfs list -H -o name -s name "${dataset}" &>/dev/null; then
+if ! dataset_exists "${dataset}"; then
 	echo ">>> No such dataset: ${dataset}"
 	exit 1
 fi

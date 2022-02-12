@@ -1,4 +1,5 @@
 use flake
 
+export ZORG_DEBUG=""
 export ZORG_USE_BORG_CACHE=1
 export ZORG_SSH_KEY=~/.ssh/backup_key_ed25519

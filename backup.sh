@@ -2,6 +2,7 @@
 set -euo pipefail
 
 scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
+source "${scriptdir}/common.sh"
 
 dataset="${1}"
 repo="$(basename -- "${dataset}")"
@@ -17,7 +18,7 @@ else
 	}
 fi
 
-if ! zfs list -H -p -o name "${dataset}" &>/dev/null; then
+if ! dataset_exists "${dataset}"; then
 	echo ">>> No such dataset '${dataset}'"
 	exit 1
 fi
@@ -30,12 +31,12 @@ borg=(
 	borg
 )
 
-echo ">>> Getting existing archives..."
+decho ">>> Getting existing archives..."
 declare -A known_archives=()
 for archive in $("${scriptdir}/list.sh" "${repo}" | jq -r '.archives[] | .archive'); do
 	known_archives["${archive}"]="1"
 done
-echo ">>> Done"
+decho ">>> Done"
 
 # Ensure that repository exists
 "${scriptdir}/with_env.sh" "${repo}" :
@@ -66,6 +67,6 @@ zfs list -H -t snapshot -o name,creation -s creation -p "${dataset}" | while rea
 			exit 1
 		}
 	else
-		echo ">>> Seems like '${_snapname}' is already archived"
+		decho ">>> Seems like '${_snapname}' is already archived"
 	fi
 done
