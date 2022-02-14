@@ -5,20 +5,21 @@ set -euo pipefail
 # bindfs and running target program without real root privileges.
 # This allows backups to be so-called uid/gid-neutral and reproducible.
 
+scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
+source "${scriptdir}/common.sh"
+
 elevate=()
 if [ "${UID}" -ne 0 ]; then
 	elevate+=(sudo --)
 fi
 
 if [ -z "${_IN_NS:-}" ]; then
+	# shellcheck disable=SC2046
 	exec -- "${elevate[@]}" unshare -m -f -p \
 		--kill-child --mount-proc \
 		-- \
-		env _IN_NS=1 _NS_UID="$(id -u)" _NS_GID="$(id -g)" "${0}" "${@}"
+		$(propagate_env _IN_NS=1 _NS_UID="$(id -u)" _NS_GID="$(id -g)") "${0}" "${@}"
 fi
-
-scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
-source "${scriptdir}/common.sh"
 
 dataset="${1}"
 if ! dataset_exists "${dataset}"; then
@@ -67,5 +68,6 @@ while [ -z "$(awk -v "mnt=${mnt_final}" '$2 == mnt { print $2 }' /proc/mounts)" 
 	sleep 0.5
 done
 
+# shellcheck disable=SC2046
 setpriv --reuid="${_NS_UID}" --regid="${_NS_GID}" --init-groups --reset-env \
-	env PATH="${PATH}" unshare -U -r --wd="${mnt_final}" -- "${@}"
+	$(propagate_env) unshare -U -r --wd="${mnt_final}" -- "${@}"

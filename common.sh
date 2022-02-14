@@ -2,6 +2,13 @@
 # shellcheck disable=SC2034,SC2154 # parent scripts define this
 : "${scriptdir}"
 
+propagated_envvars=(
+	PATH
+	ZORG_DEBUG
+	ZORG_SSH_KEY
+	ZORG_USE_BORG_CACHE
+)
+
 decho () {
 	[ -z "${ZORG_DEBUG:-}" ] && return 0
 	echo "${@}"
@@ -36,4 +43,14 @@ write_file () {
 	>&2 chmod 600 "${target}"
 	cat > "${target}"
 	>&2 chmod "${perms}" "${target}"
+}
+
+
+propagate_env () {
+	envvars=()
+	for var in "${propagated_envvars[@]}"; do
+		envvars+=("${var}=${!var:-}")
+	done
+
+	echo env "${envvars[@]}" "${@}"
 }
