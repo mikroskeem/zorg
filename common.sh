@@ -11,7 +11,7 @@ propagated_envvars=(
 
 decho () {
 	[ -z "${ZORG_DEBUG:-}" ] && return 0
-	echo "${@}"
+	echo >&2 "${@}"
 }
 
 dataset_exists () {
