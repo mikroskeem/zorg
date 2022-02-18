@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+action="${1}"
+creds_dir="${2}"
+
+case "${action}" in
+	encrypt)
+		tmp="${creds_dir}/.creds.json.${RANDOM}"
+		cat > "${tmp}"
+		sops --input-type json --in-place --encrypt "${tmp}" </dev/null
+		mv "${tmp}" "${creds_dir}/creds.json"
+		;;
+	decrypt)
+		sops --output-type json --decrypt "${creds_dir}/creds.json" </dev/null
+		;;
+	*)
+		echo >&2 "Unsupported action '${action}'"
+		exit 1
+		;;
+esac

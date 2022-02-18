@@ -48,6 +48,7 @@
               gnupg
               rage
               shellcheck
+              sops
             ] ++ lib.optionals stdenv.isDarwin [
               zfs-mac
               (sanoid.override {

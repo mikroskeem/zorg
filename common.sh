@@ -4,11 +4,16 @@
 
 default_key_prog="rage"
 
+: "${SOPS_GPG_KEYSERVER:=keys.openpgp.org}"
+export SOPS_GPG_KEYSERVER
+
 propagated_envvars=(
 	PATH
 	ZORG_DEBUG
 	ZORG_SSH_KEY
 	ZORG_USE_BORG_CACHE
+	SOPS_PGP_FP
+	SOPS_GPG_KEYSERVER
 )
 
 decho () {
@@ -66,9 +71,16 @@ _determine_key_prog () {
 
 encrypt_key () {
 	local credsdir="${1}"
-	local key_prog; key_prog="$(_determine_key_prog "${credsdir}")"
+	local key_prog="${2:-}"
+	if [ -z "${key_prog}" ]; then
+		key_prog="$(_determine_key_prog "${credsdir}")"
+	fi
 	if [ -z "${key_prog}" ]; then
 		key_prog="${default_key_prog}"
+	fi
+	if ! [ -x "${scriptdir}/key/${key_prog}" ]; then
+		echo >&2 ">>> Unsupported key program '${key_prog}'"
+		exit 1
 	fi
 
 	"${scriptdir}/key/${key_prog}" encrypt "${credsdir}"
@@ -78,6 +90,11 @@ encrypt_key () {
 decrypt_key () {
 	local credsdir="${1}"
 	local key_prog; key_prog="$(_determine_key_prog "${credsdir}")"
+
+	if ! [ -x "${scriptdir}/key/${key_prog}" ]; then
+		echo >&2 ">>> Unsupported key program '${key_prog}'"
+		exit 1
+	fi
 
 	"${scriptdir}/key/${key_prog}" decrypt "${credsdir}"
 }
