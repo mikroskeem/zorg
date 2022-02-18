@@ -11,7 +11,9 @@ creds_dir="${2}"
 
 case "${action}" in
 	encrypt)
-		rage -i "${ZORG_SSH_KEY}" -e -o "${creds_dir}/creds.json.age"
+		tmp="${creds_dir}/.creds.json.age.${RANDOM}"
+		rage -i "${ZORG_SSH_KEY}" -e -o "${tmp}"
+		mv "${tmp}" "${creds_dir}/creds.json.age"
 		;;
 	decrypt)
 		rage -i "${ZORG_SSH_KEY}" -d "${creds_dir}/creds.json.age"
