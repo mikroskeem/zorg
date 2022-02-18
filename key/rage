@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if ! [ -f "${ZORG_SSH_KEY}" ]; then
+        echo ">>> ZORG_SSH_KEY does not exist"
+        exit 1
+fi
+
+action="${1}"
+creds_dir="${2}"
+
+case "${action}" in
+	encrypt)
+		rage -i "${ZORG_SSH_KEY}" -e -o "${creds_dir}/creds.json.age"
+		;;
+	decrypt)
+		rage -i "${ZORG_SSH_KEY}" -d "${creds_dir}/creds.json.age"
+		;;
+	*)
+		echo >&2 "Unsupported action '${action}'"
+		exit 1
+		;;
+esac

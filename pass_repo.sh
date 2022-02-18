@@ -10,18 +10,21 @@ scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
 source "${scriptdir}/common.sh"
 
 repo="${1}"
-selector=""
-case "${2}" in
+selector="${2}"
+credsdir="$(creds_dir "${repo}")"
+
+case "${selector}" in
 	passphrase)
 		selector=".passphrase"
 		;;
 	key)
 		selector=".key"
 		;;
+	*)
+		echo >&2 "Unsupported selector '${selector}'"
+		exit 1
+		;;
 esac
 
-[ -n "${selector}" ]
 
-credsdir="$(creds_dir "${repo}")"
-
-rage -i "${ZORG_SSH_KEY}" -d "${credsdir}/creds.json.age" | jq -r "${selector}" | base64 -d
+decrypt_key "${credsdir}" | jq -r "${selector}" | base64 -d

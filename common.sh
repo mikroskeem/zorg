@@ -2,6 +2,8 @@
 # shellcheck disable=SC2034,SC2154 # parent scripts define this
 : "${scriptdir}"
 
+default_key_prog="rage"
+
 propagated_envvars=(
 	PATH
 	ZORG_DEBUG
@@ -53,4 +55,29 @@ propagate_env () {
 	done
 
 	echo env "${envvars[@]}" "${@}"
+}
+
+_determine_key_prog () {
+	local credsdir="${1}"
+	if [ -f "${credsdir}/type" ]; then
+		echo "$(< "${credsdir}/type")"
+	fi
+}
+
+encrypt_key () {
+	local credsdir="${1}"
+	local key_prog; key_prog="$(_determine_key_prog "${credsdir}")"
+	if [ -z "${key_prog}" ]; then
+		key_prog="${default_key_prog}"
+	fi
+
+	"${scriptdir}/key/${key_prog}" encrypt "${credsdir}"
+	echo "${key_prog}" > "${credsdir}/type"
+}
+
+decrypt_key () {
+	local credsdir="${1}"
+	local key_prog; key_prog="$(_determine_key_prog "${credsdir}")"
+
+	"${scriptdir}/key/${key_prog}" decrypt "${credsdir}"
 }
