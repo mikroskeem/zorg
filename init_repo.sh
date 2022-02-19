@@ -26,6 +26,7 @@ export BORG_BASE_DIR="${_borgdir}"
 passphrase="$(gpg --gen-random --armor 2 128)"
 keyfile="${_borgdir}/repo/key"
 
+unset BORG_NEW_PASSPRHASE
 export BORG_PASSPHRASE="${passphrase}"
 borg init --error --make-parent-dirs --encryption=keyfile-blake2 "${repodir}"
 borg key export "${repodir}" /dev/stdout | write_file 400 "${keyfile}"
