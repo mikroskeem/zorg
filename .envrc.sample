@@ -1,6 +1,7 @@
 use flake
 
 export ZORG_DEBUG=""
+export ZORG_KEY_PROG="rage"
 export ZORG_USE_BORG_CACHE=1
 export ZORG_SSH_KEY=~/.ssh/backup_key_ed25519
 export ZORG_SANOID_DATASET_SOURCE=atlas.zentria.ee:rpool/data/gameserver

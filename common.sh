@@ -2,7 +2,7 @@
 # shellcheck disable=SC2034,SC2154 # parent scripts define this
 : "${scriptdir}"
 
-default_key_prog="rage"
+default_key_prog="${ZORG_KEY_PROG}"
 
 : "${SOPS_GPG_KEYSERVER:=keys.openpgp.org}"
 export SOPS_GPG_KEYSERVER
@@ -10,6 +10,7 @@ export SOPS_GPG_KEYSERVER
 propagated_envvars=(
 	PATH
 	ZORG_DEBUG
+	ZORG_KEY_PROG
 	ZORG_SSH_KEY
 	ZORG_USE_BORG_CACHE
 	SOPS_PGP_FP
