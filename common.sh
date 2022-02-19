@@ -4,11 +4,13 @@
 
 default_key_prog="${ZORG_KEY_PROG}"
 
+: "${BORG_RELOCATED_REPO_ACCESS_IS_OK:=yes}"
 : "${SOPS_GPG_KEYSERVER:=keys.openpgp.org}"
 export SOPS_GPG_KEYSERVER
 
 propagated_envvars=(
 	PATH
+	BORG_RELOCATED_REPO_ACCESS_IS_OK
 	ZORG_DEBUG
 	ZORG_KEY_PROG
 	ZORG_SSH_KEY
