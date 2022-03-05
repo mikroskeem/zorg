@@ -25,6 +25,15 @@ repo_gid="$(stat -c %g "${scriptdir}/repos/${repo}")"
 mkdir -p "${target}"
 chown "${repo_uid}:${repo_gid}" "${target}"
 
+# XXX: we do a little trolling
+if [ -f /etc/fuse.conf ]; then
+	f="$(mktemp)"
+	echo "user_allow_other" > "${f}"
+	chmod 444 "${f}"
+
+	mount --bind "${f}" /etc/fuse.conf
+fi
+
 setpriv --reuid="${repo_uid}" --regid="${repo_gid}" --init-groups --reset-env \
 	$(propagate_env) "${scriptdir}/with_repo.sh" "${repo}" borg mount -f -o ignore_permissions,allow_other ::"${archive}" "${target}" &
 bpid="${!}"
