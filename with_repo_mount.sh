@@ -19,8 +19,14 @@ if ! [ -d "${scriptdir}/repos/${repo}" ]; then
 	exit 1
 fi
 
+repo_uid="$(stat -c %u "${scriptdir}/repos/${repo}")"
+repo_gid="$(stat -c %g "${scriptdir}/repos/${repo}")"
+
 mkdir -p "${target}"
-"${scriptdir}/with_repo.sh" "${repo}" borg mount -f -o ignore_permissions ::"${archive}" "${target}" &
+chown "${repo_uid}:${repo_gid}" "${target}"
+
+setpriv --reuid="${repo_uid}" --regid="${repo_gid}" --init-groups --reset-env \
+	$(propagate_env) "${scriptdir}/with_repo.sh" "${repo}" borg mount -f -o ignore_permissions ::"${archive}" "${target}" &
 bpid="${!}"
 
 cleanup () {
