@@ -13,12 +13,14 @@ if [ "${UID}" -ne 0 ]; then
 	elevate+=(sudo --)
 fi
 
+: "${ZORG_REMAP_READONLY:=true}"
+
 if [ -z "${_IN_NS:-}" ]; then
 	# shellcheck disable=SC2046
 	exec -- "${elevate[@]}" unshare -m -f -p \
 		--kill-child --mount-proc \
 		-- \
-		$(propagate_env _IN_NS=1 _NS_UID="$(id -u)" _NS_GID="$(id -g)") "${0}" "${@}"
+		$(propagate_env _IN_NS=1 _NS_UID="$(id -u)" _NS_GID="$(id -g)" ZORG_REMAP_READONLY="${ZORG_REMAP_READONLY}") "${0}" "${@}"
 fi
 
 dataset="${1}"
@@ -45,7 +47,9 @@ else
 	if ! [ "$(zfs get -H -o value mountpoint "${dataset}")" = "legacy" ]; then
 		mountflags+=(zfsutil)
 	fi
-	mountflags+=(ro)
+	if [ "${ZORG_REMAP_READONLY}" = "true" ]; then
+		mountflags+=(ro)
+	fi
 	mnt_final="/tmp/$(basename -- "${dataset}")"
 fi
 
