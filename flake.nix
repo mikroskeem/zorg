@@ -47,6 +47,7 @@
               borgbackup
               gnupg
               rage
+              rsync
               shellcheck
               sops
             ] ++ lib.optionals stdenv.isDarwin [
