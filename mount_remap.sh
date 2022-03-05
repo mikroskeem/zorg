@@ -21,7 +21,7 @@ if [ -z "${_IN_NS:-}" ]; then
 	exec -- "${elevate[@]}" unshare -m -f -p \
 		--kill-child --mount-proc \
 		-- \
-		$(propagate_env _IN_NS=1 _NS_UID="$(id -u)" _NS_GID="$(id -g)" ZORG_REMAP_READONLY="${ZORG_REMAP_READONLY}") "${0}" "${@}"
+		$(propagate_env _IN_NS=1 _NS_UID="$(id -u)" _NS_GID="$(id -g)") "${0}" "${@}"
 fi
 
 dataset="${1}"
