@@ -65,7 +65,7 @@ else
 	mkdir -p "${mnt_dataset}" "${mnt_final}"
 
 	mount -t zfs -o "$(IFS=,; echo "${mountflags[*]}")" "${dataset}" "${mnt_dataset}"
-	bindfs -u "${_NS_UID}" -g "${_NS_GID}" "${mnt_dataset}" "${mnt_final}" -f &
+	bindfs --create-as-mounter -u "${_NS_UID}" -g "${_NS_GID}" "${mnt_dataset}" "${mnt_final}" -f &
 	bpid="${!}"
 
 	cleanup () {
