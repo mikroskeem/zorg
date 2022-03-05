@@ -52,7 +52,7 @@ zfs create "${dataset}" || true
 
 # We always want to match uid/gid from the archives
 export ZORG_REMAP_READONLY=false
-export ZORG_REMAP_WRITE_NO_BINDFS=true
+export ZORG_REMAP_WRITE_NO_REMAP=true
 
 "${scriptdir}/list.sh" "${repo}" | process_list | jq -r '"\(.archive)\t\(.data.snapshot)"' | while read -r -a data; do
 	archive="${data[0]}"

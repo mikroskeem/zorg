@@ -14,7 +14,7 @@ if [ "${UID}" -ne 0 ]; then
 fi
 
 : "${ZORG_REMAP_READONLY:=true}"
-: "${ZORG_REMAP_WRITE_NO_BINDFS:=false}"
+: "${ZORG_REMAP_WRITE_NO_REMAP:=false}"
 
 if [ -z "${_IN_NS:-}" ]; then
 	# shellcheck disable=SC2046
@@ -57,7 +57,7 @@ else
 fi
 
 mount -t tmpfs tmpfs /tmp
-if (( is_dataset )) && ! [ "${ZORG_REMAP_READONLY}" = "true" ] && [ "${ZORG_REMAP_WRITE_NO_BINDFS}" = "true" ]; then
+if (( is_dataset )) && ! [ "${ZORG_REMAP_READONLY}" = "true" ] && [ "${ZORG_REMAP_WRITE_NO_REMAP}" = "true" ]; then
 	mkdir -p "${mnt_final}"
 	mount -t zfs -o "$(IFS=,; echo "${mountflags[*]}")" "${dataset}" "${mnt_final}"
 else
@@ -69,6 +69,7 @@ else
 	bpid="${!}"
 
 	cleanup () {
+		cd /
 		umount "${mnt_final}" || kill -9 "${bpid}"
 		wait "${bpid}"
 	}
@@ -80,6 +81,11 @@ while [ -z "$(awk -v "mnt=${mnt_final}" '$2 == mnt { print $2 }' /proc/mounts)" 
 	sleep 0.5
 done
 
-# shellcheck disable=SC2046
-setpriv --reuid="${_NS_UID}" --regid="${_NS_GID}" --init-groups --reset-env \
-	$(propagate_env) unshare -U -r --wd="${mnt_final}" -- "${@}"
+if [ "${ZORG_REMAP_WRITE_NO_REMAP}" = "true" ]; then
+	cd "${mnt_final}"
+	"${@}"
+else
+	# shellcheck disable=SC2046
+	setpriv --reuid="${_NS_UID}" --regid="${_NS_GID}" --init-groups --reset-env \
+		$(propagate_env) unshare -U -r --wd="${mnt_final}" -- "${@}"
+fi
