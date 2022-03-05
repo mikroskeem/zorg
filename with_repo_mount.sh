@@ -26,7 +26,7 @@ mkdir -p "${target}"
 chown "${repo_uid}:${repo_gid}" "${target}"
 
 setpriv --reuid="${repo_uid}" --regid="${repo_gid}" --init-groups --reset-env \
-	$(propagate_env) "${scriptdir}/with_repo.sh" "${repo}" borg mount -f -o ignore_permissions ::"${archive}" "${target}" &
+	$(propagate_env) "${scriptdir}/with_repo.sh" "${repo}" borg mount -f -o ignore_permissions,allow_other ::"${archive}" "${target}" &
 bpid="${!}"
 
 cleanup () {
