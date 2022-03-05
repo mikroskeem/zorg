@@ -41,13 +41,6 @@ process_list () {
 	jq '.archives[] | {archive: .archive, data: (.comment | split(":") | if .[0] == "json" then (.[1] | @base64d | fromjson) else null end)}'
 }
 
-borg=(
-        "${scriptdir}/with_repo.sh"
-        "${repo}"
-        chrt -i 0
-        borg
-)
-
 zfs create "${dataset}" || true
 
 # We always want to match uid/gid from the archives
@@ -58,7 +51,9 @@ export ZORG_REMAP_WRITE_NO_REMAP=true
 	archive="${data[0]}"
 	snapshot="${data[1]}"
 
-	"${borg[@]}" export-tar ::"${archive}" /dev/stdout \
-		| "${scriptdir}/mount_remap.sh" "${dataset}" tar -xvf -
+	"${scriptdir}/mount_remap.sh" "${dataset}" \
+		"${scriptdir}/with_repo_mount.sh" "${repo}" "${archive}" /tmp/archive \
+		rsync -axv /tmp/archive/ .
+
 	zfs snapshot "${dataset}@${snapshot}"
 done
