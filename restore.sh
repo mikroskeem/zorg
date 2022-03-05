@@ -59,6 +59,6 @@ export ZORG_REMAP_WRITE_NO_BINDFS=true
 	snapshot="${data[1]}"
 
 	"${borg[@]}" export-tar ::"${archive}" /dev/stdout \
-		| "${scriptdir}/mount_remap.sh" "${dataset}" bash -c "cat /proc/mounts && tar -xvf -"
+		| "${scriptdir}/mount_remap.sh" "${dataset}" tar -xvf -
 	zfs snapshot "${dataset}@${snapshot}"
 done
