@@ -31,7 +31,7 @@
         inherit (pkgs) lib;
       in
       rec {
-        devShell = pkgs.mkShell {
+        devShell = (pkgs.mkShell.override { stdenv = pkgs.stdenvNoCC; }) {
           buildInputs = with pkgs; [
             bindfs
             borgbackup
