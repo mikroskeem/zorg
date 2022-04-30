@@ -18,7 +18,7 @@ if [ -z "${_IN_NS:-}" ]; then
 	exec -- "${elevate[@]}" unshare -m -f -p \
 		--kill-child --mount-proc \
 		-- \
-		$(propagate_env _IN_NS=1 _NS_UID="$(id -u)" _NS_GID="$(id -g)") "${0}" "${@}"
+		$(propagate_env _IN_NS=1 _NS_UID="$(id -u)" _NS_GID="$(id -g)" HOME="${HOME}" XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR}") "${0}" "${@}"
 fi
 
 dataset="${1}"
@@ -70,4 +70,5 @@ done
 
 # shellcheck disable=SC2046
 setpriv --reuid="${_NS_UID}" --regid="${_NS_GID}" --init-groups --reset-env \
-	$(propagate_env) unshare -U -r --wd="${mnt_final}" -- "${@}"
+	$(propagate_env) unshare -U -r --wd="${mnt_final}" --fork -- \
+	$(propagate_env HOME="${HOME}" XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR}") "${@}" >&2

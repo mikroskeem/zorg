@@ -4,6 +4,7 @@
 
 default_key_prog="${ZORG_KEY_PROG}"
 
+: "${BORG_RSH:=ssh}"
 : "${BORG_RELOCATED_REPO_ACCESS_IS_OK:=yes}"
 : "${SOPS_GPG_KEYSERVER:=keys.openpgp.org}"
 export SOPS_GPG_KEYSERVER
@@ -12,12 +13,15 @@ propagated_envvars=(
 	PATH
 	BORG_RELOCATED_REPO_ACCESS_IS_OK
 	BORG_REMOTE_PATH
+	BORG_RSH
+	GNUPGHOME
 	ZORG_DEBUG
 	ZORG_KEY_PROG
 	ZORG_SSH_KEY
 	ZORG_USE_BORG_CACHE
 	SOPS_PGP_FP
 	SOPS_GPG_KEYSERVER
+	SSH_AUTH_SOCK
 )
 
 decho () {
@@ -60,7 +64,9 @@ write_file () {
 propagate_env () {
 	envvars=()
 	for var in "${propagated_envvars[@]}"; do
-		envvars+=("${var}=${!var:-}")
+		value="${!var:-}"
+		[ -z "${value}" ] && continue
+		envvars+=("${var}=${value}")
 	done
 
 	echo env "${envvars[@]}" "${@}"
