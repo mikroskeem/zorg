@@ -101,3 +101,14 @@ decrypt_key () {
 
 	"${scriptdir}/key/${key_prog}" decrypt "${credsdir}"
 }
+
+resolve_repo_dir () {
+	local repodir="${1}"
+	local repo_name="${2}"
+
+	if [ -d "${repodir}/${repo_name}" ]; then
+		echo -n "${repodir}/${repo_name}"
+	elif [ -f "${repodir}/${repo_name}.remote" ]; then
+		echo -n "$(< "${repodir}/${repo_name}.remote")"
+	fi
+}
