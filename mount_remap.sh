@@ -70,6 +70,15 @@ while [ -z "$(awk -v "mnt=${mnt_final}" '$2 == mnt { print $2 }' /proc/mounts)" 
 	sleep 0.5
 done
 
+# hack around users for ssh
+# TODO: I'm pretty sure that there's a PAM module for that
+cat /etc/passwd | sed -e "s#:/root:#:${HOME}:#" > /tmp/zorg/.passwd
+mount --bind /tmp/zorg/.passwd /etc/passwd
+if [ -d /var/run/nscd ]; then
+	mount -t tmpfs tmpfs /var/run/nscd
+fi
+
+
 # shellcheck disable=SC2046
 setpriv --reuid="${_NS_UID}" --regid="${_NS_GID}" --init-groups --reset-env \
 	$(propagate_env) unshare -U -r --wd="${mnt_final}" --fork -- \
