@@ -39,18 +39,19 @@ if grep -q "@" <<< "${dataset}"; then
 	IFS=@ read -r -a _snapshot <<< "${dataset}"
 	_dataset="${_snapshot[0]}"
 	_snap="${_snapshot[1]}"
-	mnt_final="/tmp/${_snap}"
+	mnt_final="/tmp/zorg/${_snap}"
 else
 	# work around zfs annoying mount mechanism
 	if ! [ "$(zfs get -H -o value mountpoint "${dataset}")" = "legacy" ]; then
 		mountflags+=(zfsutil)
 	fi
 	mountflags+=(ro)
-	mnt_final="/tmp/$(basename -- "${dataset}")"
+	mnt_final="/tmp/zorg/$(basename -- "${dataset}")"
 fi
 
-mount -t tmpfs tmpfs /tmp
-mnt_dataset="/tmp/.real/dataset"
+mkdir -p /tmp/zorg
+mount -t tmpfs tmpfs /tmp/zorg
+mnt_dataset="/tmp/zorg/.real/dataset"
 mkdir -p "${mnt_dataset}" "${mnt_final}"
 
 mount -t zfs -o "$(IFS=,; echo "${mountflags[*]}")" "${dataset}" "${mnt_dataset}"
@@ -58,6 +59,7 @@ bindfs -u "${_NS_UID}" -g "${_NS_GID}" "${mnt_dataset}" "${mnt_final}" -f &
 bpid="${!}"
 
 cleanup () {
+	cd /
 	umount "${mnt_final}" || kill -9 "${bpid}"
 	wait "${bpid}"
 }
