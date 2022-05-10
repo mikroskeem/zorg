@@ -17,13 +17,12 @@ new_type="${2:-"${current_type}"}"
 
 mkdir -p "${new_credsdir}"
 
-cleanup () {
+cleanup_credsdir () {
 	if [ -d "${new_credsdir}" ]; then
 		rm -rf "${new_credsdir}"
 	fi
 }
-
-trap 'cleanup' EXIT
+cleanup_hooks+=(cleanup_credsdir)
 
 decrypt_key "${credsdir}" | encrypt_key "${new_credsdir}" "${new_type}"
 rm -rf "${credsdir}"

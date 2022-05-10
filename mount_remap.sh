@@ -58,12 +58,12 @@ mount -t zfs -o "$(IFS=,; echo "${mountflags[*]}")" "${dataset}" "${mnt_dataset}
 bindfs -u "${_NS_UID}" -g "${_NS_GID}" "${mnt_dataset}" "${mnt_final}" -f &
 bpid="${!}"
 
-cleanup () {
+cleanup_mount () {
 	cd /
 	umount "${mnt_final}" || kill -9 "${bpid}"
 	wait "${bpid}"
 }
-trap 'cleanup' EXIT
+cleanup_hooks+=(cleanup_mount)
 
 #findmnt --poll=mount --first-only --timeout=$((10 * 1000)) --mountpoint "${mnt_final}" # TODO: crashes with double free???
 while [ -z "$(awk -v "mnt=${mnt_final}" '$2 == mnt { print $2 }' /proc/mounts)" ]; do

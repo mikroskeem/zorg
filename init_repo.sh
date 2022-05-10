@@ -27,10 +27,10 @@ fi
 mkdir -p "$(dirname -- "${repodir_data}")"
 
 _borgdir="$(mktemp -d)"
-cleanup () {
+cleanup_borgdir () {
 	rm -rf "${_borgdir}" || true
 }
-trap 'cleanup' EXIT
+cleanup_hooks+=(cleanup_borgdir)
 
 export BORG_BASE_DIR="${_borgdir}"
 passphrase="$(gpg --gen-random --armor 2 128)"

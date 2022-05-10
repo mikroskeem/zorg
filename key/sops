@@ -1,18 +1,25 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+: "${ZORG_SOPS_KEYSERVICE_ADDR}"
+
 action="${1}"
 creds_dir="${2}"
+
+sops_flags=(
+	--enable-local-keyservice=false
+	--keyservice="${ZORG_SOPS_KEYSERVICE_ADDR}"
+)
 
 case "${action}" in
 	encrypt)
 		tmp="${creds_dir}/.creds.json.${RANDOM}"
 		cat > "${tmp}"
-		sops --input-type json --in-place --encrypt "${tmp}" </dev/null
+		sops "${sops_flags[@]}" --input-type json --in-place --encrypt "${tmp}" </dev/null
 		mv "${tmp}" "${creds_dir}/creds.json"
 		;;
 	decrypt)
-		sops --output-type json --decrypt "${creds_dir}/creds.json" </dev/null
+		sops "${sops_flags[@]}" --output-type json --decrypt "${creds_dir}/creds.json" </dev/null
 		;;
 	*)
 		echo >&2 "Unsupported action '${action}'"

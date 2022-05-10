@@ -14,12 +14,11 @@ propagated_envvars=(
 	BORG_RELOCATED_REPO_ACCESS_IS_OK
 	BORG_REMOTE_PATH
 	BORG_RSH
-	GNUPGHOME
-	GPG_TTY
 	ZORG_DEBUG
 	ZORG_KEY_PROG
 	ZORG_SSH_KEY
 	ZORG_USE_BORG_CACHE
+	ZORG_SOPS_KEYSERVICE_ADDR
 	SOPS_PGP_FP
 	SOPS_GPG_KEYSERVER
 	SSH_AUTH_SOCK
@@ -120,3 +119,28 @@ resolve_repo_dir () {
 		echo -n "$(< "${repodir}/${repo_name}.remote")"
 	fi
 }
+
+cleanup_hooks=()
+run_cleanup_hooks () {
+	for hook in "${cleanup_hooks[@]}"; do
+		"${hook}" || echo "hook '${hook}' failed!"
+	done
+}
+
+trap 'run_cleanup_hooks' EXIT
+
+if [ -z "${ZORG_SOPS_KEYSERVICE_ADDR:-}" ]; then
+	dir="$(mktemp --tmpdir -d zorgsops."${USER}".XXXXXXX)"
+	sops keyservice --network unix --address "${dir}/sock" &
+	sops_pid="${!}"
+
+	cleanup_sops () {
+		if kill -TERM "${sops_pid}"; then
+			wait "${sops_pid}" || true
+		fi
+		rm -rf "${dir}"
+	}
+	cleanup_hooks+=(cleanup_sops)
+
+	export ZORG_SOPS_KEYSERVICE_ADDR="unix:${dir}/sock"
+fi

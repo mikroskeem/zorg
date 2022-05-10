@@ -17,11 +17,10 @@ repodir="${scriptdir}/repos"
 
 _borgdir="$(mktemp --tmpdir -d borghome."${USER}".XXXXXXX)"
 
-cleanup () {
+cleanup_borgdir () {
 	rm -rf "${_borgdir}" || true
 }
-
-trap 'cleanup' EXIT
+cleanup_hooks+=(cleanup_borgdir)
 
 repo="$(resolve_repo_dir "${repodir}" "${repo_name}")"
 if [ -z "${repo}" ]; then
