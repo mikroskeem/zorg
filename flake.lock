@@ -41,11 +41,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1647039077,
-        "narHash": "sha256-nOG33THznHI8+a1mKJ4nKGl3T/TwEKVE4RTIXB3GDKA=",
+        "lastModified": 1652465226,
+        "narHash": "sha256-2KwpV9qiEvlkAmaERTONjaIT0xcdYGuoLBWiyG0nRdM=",
         "owner": "mikroskeem",
         "repo": "openzfs-osx-shim-nix",
-        "rev": "b2dd3cae310c6d312303ed1cc694811f4ecdb4e1",
+        "rev": "69d16c001c7fc246b5c8e9f7990b2fa80db13a44",
         "type": "github"
       },
       "original": {
