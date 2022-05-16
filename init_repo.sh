@@ -7,20 +7,30 @@ set -euo pipefail
 scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
 source "${scriptdir}/common.sh"
 
-repo="${1}"
-repodir="${scriptdir}/repos/${repo}"
-credsdir="$(creds_dir "${repo}")"
+repo_name="${1}"
+remote="${2:-}"
+
+repodir="${scriptdir}/repos/${repo_name}"
+credsdir="$(creds_dir "${repo_name}")"
 
 if [ -d "${credsdir}" ]; then
-	echo ">>> Credentials for '${repo}' already exist, bailing out."
+	echo ">>> Credentials for '${repo_name}' already exist, bailing out."
 	exit 1
 fi
 
+repo="${repodir}"
+repodir_data="${repodir}.remote"
+if [ -n "${remote}" ]; then
+	repo="${remote}"
+	echo "${repo}" > "${repodir_data}"
+fi
+mkdir -p "$(dirname -- "${repodir_data}")"
+
 _borgdir="$(mktemp -d)"
-cleanup () {
+cleanup_borgdir () {
 	rm -rf "${_borgdir}" || true
 }
-trap 'cleanup' EXIT
+cleanup_hooks+=(cleanup_borgdir)
 
 export BORG_BASE_DIR="${_borgdir}"
 passphrase="$(gpg --gen-random --armor 2 128)"
@@ -28,8 +38,8 @@ keyfile="${_borgdir}/repo/key"
 
 unset BORG_NEW_PASSPRHASE
 export BORG_PASSPHRASE="${passphrase}"
-borg init --error --make-parent-dirs --encryption=keyfile-blake2 "${repodir}"
-borg key export "${repodir}" /dev/stdout | write_file 400 "${keyfile}"
+borg init --error --make-parent-dirs --encryption=keyfile-blake2 "${repo}"
+borg key export "${repo}" /dev/stdout | write_file 400 "${keyfile}"
 
 credsjson="$(jq -c <<EOF
 { "passphrase": "$(base64 -w 0 <<< "${passphrase}")"

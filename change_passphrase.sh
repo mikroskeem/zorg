@@ -4,14 +4,16 @@ set -euo pipefail
 scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
 source "${scriptdir}/common.sh"
 
-repo="${1}"
+repo_name="${1}"
+repodir="${scriptdir}/repos"
+repo="$(resolve_repo_dir "${repodir}" "${repo_name}")"
 
-if ! [ -d "${scriptdir}/repos/${repo}" ]; then
-	echo ">>> Repository '${repo}' does not exist"
+if ! [ -n "${repo}" ]; then
+	echo ">>> Repository '${repo_name}' does not exist"
 	exit 1
 fi
 
-credsdir="$(creds_dir "${repo}")"
+credsdir="$(creds_dir "${repo_name}")"
 
 new_passphrase="${2:-}"
 if [ "${new_passphrase}" = "-" ] || [ "${new_passphrase}" = "/dev/stdin" ]; then
@@ -25,7 +27,7 @@ elif [ -z "${new_passphrase}" ]; then
 fi
 
 export BORG_NEW_PASSPHRASE="${new_passphrase}"
-new_key="$("${scriptdir}/with_repo.sh" "${repo}" bash -euc 'borg key change-passphrase 1>&2 && borg key export :: /dev/stdout')"
+new_key="$("${scriptdir}/with_repo.sh" "${repo_name}" bash -euc 'borg key change-passphrase 1>&2 && borg key export :: /dev/stdout')"
 
 # Write new credentials
 decrypt_key "${credsdir}" \

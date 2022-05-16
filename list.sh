@@ -2,6 +2,10 @@
 set -euo pipefail
 
 scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
-repo="${1}"
+source "${scriptdir}/common.sh"
 
-[ -d "${scriptdir}/repos/${repo}" ] && exec -- "${scriptdir}/with_repo.sh" "${repo}" borg list --json --format "{comment}"
+repo_name="${1}"
+repodir="${scriptdir}/repos"
+repo="$(resolve_repo_dir "${repodir}" "${repo_name}")"
+
+[ -n "${repo}" ] && "${scriptdir}/with_repo.sh" "${repo_name}" borg list --json --format "{comment}"

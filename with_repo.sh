@@ -5,7 +5,7 @@ set -euo pipefail
 # If repository does not exist on disk, then it'll be initialized from scratch using
 # init_repo.sh script.
 
-repo="${1}"
+repo_name="${1}"
 shift
 
 : "${ZORG_USE_BORG_CACHE:=0}"
@@ -17,15 +17,19 @@ repodir="${scriptdir}/repos"
 
 _borgdir="$(mktemp --tmpdir -d borghome."${USER}".XXXXXXX)"
 
-cleanup () {
+cleanup_borgdir () {
 	rm -rf "${_borgdir}" || true
 }
+cleanup_hooks+=(cleanup_borgdir)
 
-trap 'cleanup' EXIT
+repo="$(resolve_repo_dir "${repodir}" "${repo_name}")"
+if [ -z "${repo}" ]; then
+	"${scriptdir}/init_repo.sh" "${repo_name}"
+	repo="$(resolve_repo_dir "${repodir}" "${repo_name}")"
+	[ -n "${repo}" ]
+fi
 
-
-test -d "${repodir}/${repo}" || "${scriptdir}/init_repo.sh" "${repo}"
-"${scriptdir}/pass_repo.sh" "${repo}" key | write_file 400 "${_borgdir}/repo/key"
+"${scriptdir}/pass_repo.sh" "${repo_name}" key | write_file 400 "${_borgdir}/repo/key"
 
 
 if [ "${ZORG_USE_BORG_CACHE}" = "1" ]; then
@@ -34,10 +38,10 @@ if [ "${ZORG_USE_BORG_CACHE}" = "1" ]; then
 	export BORG_CACHE_DIR="${cachedir}"
 fi
 
-export BORG_PASSCOMMAND="${scriptdir}/pass_repo.sh '${repo}' passphrase"
+export BORG_PASSCOMMAND="${scriptdir}/pass_repo.sh '${repo_name}' passphrase"
 export BORG_KEY_FILE="${_borgdir}/repo/key"
 export BORG_BASE_DIR="${_borgdir}"
-export BORG_REPO="${repodir}/${repo}"
+export BORG_REPO="${repo}"
 export BORG_SELFTEST="disabled"
 
 "${@}"

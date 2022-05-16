@@ -4,6 +4,7 @@
 
 default_key_prog="${ZORG_KEY_PROG}"
 
+: "${BORG_RSH:=ssh}"
 : "${BORG_RELOCATED_REPO_ACCESS_IS_OK:=yes}"
 : "${SOPS_GPG_KEYSERVER:=keys.openpgp.org}"
 export SOPS_GPG_KEYSERVER
@@ -11,12 +12,17 @@ export SOPS_GPG_KEYSERVER
 propagated_envvars=(
 	PATH
 	BORG_RELOCATED_REPO_ACCESS_IS_OK
+	BORG_REMOTE_PATH
+	BORG_RSH
+	GNUPGHOME
 	ZORG_DEBUG
 	ZORG_KEY_PROG
 	ZORG_SSH_KEY
 	ZORG_USE_BORG_CACHE
+	ZORG_SOPS_KEYSERVICE_ADDR
 	SOPS_PGP_FP
 	SOPS_GPG_KEYSERVER
+	SSH_AUTH_SOCK
 )
 
 decho () {
@@ -59,7 +65,9 @@ write_file () {
 propagate_env () {
 	envvars=()
 	for var in "${propagated_envvars[@]}"; do
-		envvars+=("${var}=${!var:-}")
+		value="${!var:-}"
+		[ -z "${value}" ] && continue
+		envvars+=("${var}=${value}")
 	done
 
 	echo env "${envvars[@]}" "${@}"
@@ -101,3 +109,39 @@ decrypt_key () {
 
 	"${scriptdir}/key/${key_prog}" decrypt "${credsdir}"
 }
+
+resolve_repo_dir () {
+	local repodir="${1}"
+	local repo_name="${2}"
+
+	if [ -d "${repodir}/${repo_name}" ]; then
+		echo -n "${repodir}/${repo_name}"
+	elif [ -f "${repodir}/${repo_name}.remote" ]; then
+		echo -n "$(< "${repodir}/${repo_name}.remote")"
+	fi
+}
+
+cleanup_hooks=()
+run_cleanup_hooks () {
+	for hook in "${cleanup_hooks[@]}"; do
+		"${hook}" || echo "hook '${hook}' failed!"
+	done
+}
+
+trap 'run_cleanup_hooks' EXIT
+
+if [ -z "${ZORG_SOPS_KEYSERVICE_ADDR:-}" ]; then
+	dir="$(mktemp --tmpdir -d zorgsops."${USER}".XXXXXXX)"
+	sops keyservice --network unix --address "${dir}/sock" &
+	sops_pid="${!}"
+
+	cleanup_sops () {
+		if kill -TERM "${sops_pid}"; then
+			wait "${sops_pid}" || true
+		fi
+		rm -rf "${dir}"
+	}
+	cleanup_hooks+=(cleanup_sops)
+
+	export ZORG_SOPS_KEYSERVICE_ADDR="unix:${dir}/sock"
+fi
