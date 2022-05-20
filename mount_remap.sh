@@ -72,7 +72,7 @@ done
 
 # hack around users for ssh
 # TODO: I'm pretty sure that there's a PAM module for that
-cat /etc/passwd | sed -e "s#:/root:#:${HOME}:#" > /tmp/zorg/.passwd
+sed -e "s#:/root:#:${HOME}:#" < /etc/passwd > /tmp/zorg/.passwd
 mount --bind /tmp/zorg/.passwd /etc/passwd
 if [ -d /var/run/nscd ]; then
 	mount -t tmpfs tmpfs /var/run/nscd

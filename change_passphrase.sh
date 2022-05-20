@@ -8,7 +8,7 @@ repo_name="${1}"
 repodir="${scriptdir}/repos"
 repo="$(resolve_repo_dir "${repodir}" "${repo_name}")"
 
-if ! [ -n "${repo}" ]; then
+if [ -z "${repo}" ]; then
 	echo ">>> Repository '${repo_name}' does not exist"
 	exit 1
 fi
