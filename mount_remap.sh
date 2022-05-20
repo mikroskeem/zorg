@@ -46,7 +46,7 @@ else
 		mountflags+=(zfsutil)
 	fi
 	mountflags+=(ro)
-	mnt_final="/tmp/zorg/$(basename -- "${dataset}")"
+	mnt_final="/tmp/zorg/$(dataset_to_repo_name "${dataset}")"
 fi
 
 mkdir -p /tmp/zorg

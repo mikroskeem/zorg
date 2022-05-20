@@ -121,6 +121,14 @@ resolve_repo_dir () {
 	fi
 }
 
+dataset_to_repo_name () {
+	local dataset="${1}"
+	if [[ "${dataset}" = *@* ]]; then
+		dataset="${dataset/@*/}"
+	fi
+	basename -- "${dataset}"
+}
+
 cleanup_hooks=()
 run_cleanup_hooks () {
 	for hook in "${cleanup_hooks[@]}"; do

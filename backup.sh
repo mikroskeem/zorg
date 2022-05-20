@@ -5,7 +5,7 @@ scriptdir="$(dirname -- "$(readlink -f "${BASH_SOURCE[0]}")")"
 source "${scriptdir}/common.sh"
 
 dataset="${1}"
-repo="$(basename -- "${dataset}")"
+repo="$(dataset_to_repo_name "${dataset}")"
 
 if [ -f "${scriptdir}/ignored.txt" ]; then
 	process_dataset() {
@@ -45,7 +45,7 @@ zfs list -H -t snapshot -o name,creation -s creation -p "${dataset}" | while rea
 	_snapname="${target[0]}"
 	ts="${target[1]}"
 
-
+	_dataset="$(cut -d@ -f1 <<< "${_snapname}")"
 	snapname="$(cut -d@ -f2- <<< "${_snapname}")"
 	if ! process_dataset "${snapname}"; then
 		continue
@@ -57,7 +57,7 @@ zfs list -H -t snapshot -o name,creation -s creation -p "${dataset}" | while rea
 	if ! [[ -v known_archives["${name}"] ]]; then
 		echo ">>> Going for '${snapname}' -> '${name}'"
 		comment_args=(
-			--arg ds "${dataset}"
+			--arg ds "${_dataset}"
 			--arg s "${snapname}"
 			--arg ts "${ts}"
 		)
